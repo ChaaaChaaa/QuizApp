@@ -2,6 +2,8 @@ package com.example.geoquiz;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,12 +15,13 @@ import android.widget.Toast;
 public class QuizActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
-    private ImageButton mNextButton;
-    private ImageButton mPrevButton;
+    private Button mNextButton;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
 
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Question[] mQuestionBank = new Question[]{
             new Question(R.string.question_oceans, true),
@@ -29,6 +32,19 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    private boolean mlsCheater;
+    GradeQuiz gradeQuiz = new GradeQuiz();
+
+    private void routeQuizApp(){
+        int totalQuestions = mQuestionBank.length-1;
+
+        for(int i=0; i<=totalQuestions; i++){
+            updateQuestion();
+        }
+        gradeQuiz.averResult(totalQuestions);
+    }
+
+
 
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
@@ -54,24 +70,25 @@ public class QuizActivity extends AppCompatActivity {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId = 0;
 
-        if (userPressedTrue == answerIsTrue) {
-            messageResId = R.string.correct_toast;
-            preventingRepeatAnswerFalseButton();
+        if(mlsCheater){
+            messageResId = R.string.judgment_toast;
         }
-        if (userPressedTrue != answerIsTrue) {
-            messageResId = R.string.incorrect_toast;
-            preventingRepeatAnswerTrueButton();
+        else {
+            if (userPressedTrue == answerIsTrue) {
+                messageResId = R.string.correct_toast;
+                preventingRepeatAnswerFalseButton();
+                gradeQuiz.getScore();
+            }
+            if (userPressedTrue != answerIsTrue) {
+                messageResId = R.string.incorrect_toast;
+                preventingRepeatAnswerTrueButton();
+            }
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
     }
 
-    private void checkArrIdxZero() {
-        if (mCurrentIndex == 0) {
-            mCurrentIndex = mQuestionBank.length - 1;
-        } else {
-            mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
-        }
-    }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,17 +114,8 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
-        mPrevButton = (ImageButton) findViewById(R.id.prev_button);
-        mPrevButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                checkArrIdxZero();
-                updateQuestion();
-            }
-        });
 
-
-        mNextButton = (ImageButton) findViewById(R.id.next_button);
+        mNextButton = (Button) findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,11 +124,33 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        mCheatButton = (Button)findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent i = CheatActivity.newIntent(QuizActivity.this, answerIsTrue);
+                startActivityForResult(i,REQUEST_CODE_CHEAT);
+            }
+        });
+
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX, 0);
         }
+        routeQuizApp();
+    }
 
-        updateQuestion();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode != Activity.RESULT_OK){
+            return;
+        }
+        if(requestCode == REQUEST_CODE_CHEAT){
+            if(data == null){
+                return;
+            }
+            mlsCheater = CheatActivity.wasAnswerShown(data);
+        }
     }
 
     public void onSaveInstanceState(Bundle savedInstanceState) {
