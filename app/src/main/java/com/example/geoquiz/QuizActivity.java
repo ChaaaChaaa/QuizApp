@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,6 +54,7 @@ public class QuizActivity extends AppCompatActivity {
     private void resetPreventingRepeatAnswerButton() {
         mTrueButton.setEnabled(true);
         mFalseButton.setEnabled(true);
+        mCheatButton.setEnabled(true);
     }
 
     private void preventingRepeatAnswerFalseButton() {
@@ -65,6 +65,12 @@ public class QuizActivity extends AppCompatActivity {
         mTrueButton.setEnabled(false);
     }
 
+    private void preventingRepeatCheatingCheatButton(){
+        mCheatButton.setEnabled(false);
+    }
+
+
+
 
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
@@ -72,6 +78,7 @@ public class QuizActivity extends AppCompatActivity {
 
         if(mlsCheater){
             messageResId = R.string.judgment_toast;
+            preventingRepeatCheatingCheatButton();
         }
         else {
             if (userPressedTrue == answerIsTrue) {
