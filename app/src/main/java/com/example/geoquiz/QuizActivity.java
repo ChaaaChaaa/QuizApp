@@ -79,6 +79,7 @@ public class QuizActivity extends AppCompatActivity {
         if(mlsCheater){
             messageResId = R.string.judgment_toast;
             preventingRepeatCheatingCheatButton();
+            mlsCheater = false;
         }
         else {
             if (userPressedTrue == answerIsTrue) {
