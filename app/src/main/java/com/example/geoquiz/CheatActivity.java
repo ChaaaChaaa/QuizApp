@@ -49,7 +49,7 @@ public class CheatActivity extends AppCompatActivity {
                 else {
                     mAnswerTexView.setText(R.string.false_button);
                 }
-                setAnswerShownReault(true);
+                setAnswerShownResult(true);
 
                 int cx = mShowAnswer.getWidth()/2;
                 int cy = mShowAnswer.getHeight()/2;
@@ -66,7 +66,7 @@ public class CheatActivity extends AppCompatActivity {
         });
     }
 
-    private void setAnswerShownReault(boolean isAnswerShown){
+    private void setAnswerShownResult(boolean isAnswerShown){
         Intent data = new Intent();
         data.putExtra(EXTRA_ANSWER_SHOWN,isAnswerShown);
         setResult(RESULT_OK,data);
